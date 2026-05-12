@@ -1,43 +1,27 @@
 trigger:
 - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+resources:
+- repo: self
 
 variables:
-  # 1. This must match your Docker Hub Connection (using the PAT you made)
-  dockerRegistryConnection: 'DockerHubConnection' 
-  # 2. Your Docker Hub username/repo
-  imageRepository: 'meghanshu0/tikkle-app' 
-  tag: '$(Build.BuildId)'
+  tag: 'latest'
+  dockerRegistryConnection: 'DockerHubConnection'
+  imageRepository: 'meghanshu0/tikkle-app'
 
 stages:
 - stage: Build
-  displayName: 'Build and Push to Docker Hub'
   jobs:
   - job: Build
+    pool:
+      vmImage: ubuntu-latest
+
     steps:
     - task: Docker@2
-      displayName: 'Build and Push Image'
       inputs:
         command: buildAndPush
-        containerRegistry: $(dockerRegistryConnection)
         repository: $(imageRepository)
+        containerRegistry: $(dockerRegistryConnection)
         dockerfile: '$(Build.SourcesDirectory)/tikkle/Dockerfile'
         tags: |
           $(tag)
-          latest
-
-# We are COMMENTING OUT the Deploy stage for a moment 
-# so your pipeline doesn't fail while we fix the connection.
-# - stage: Deploy
-#   displayName: 'Deploy Stage'
-#   dependsOn: Build
-#   jobs:
-#   - deployment: Deploy
-#     environment: 'production'
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - script: echo "Deployment will be re-enabled once Azure connection is fixed."
