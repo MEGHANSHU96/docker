@@ -5,7 +5,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  dockerRegistryConnection: 'mydocker'
+  dockerRegistryConnection: 'MYDOCKER'
   imageRepository: 'meghanshu0/tikkle-app'
   tag: 'latest'
 
