@@ -4,75 +4,70 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Docker learning project. As files and examples are added, update this file to reflect the actual structure and commands used.
+This repo is a Docker learning project built around **tikkle** — a React 19 + Vite 8 + Tailwind CSS 4 e-commerce fashion storefront. The app lives in `tikkle/` and is containerized via a multi-stage Dockerfile (Node build → nginx serve). CI/CD uses Azure Pipelines to push the image to Docker Hub (`meghanshu0/tikkle-app`).
 
-## Common Commands
+## App Architecture
 
-### Docker Basics
+The frontend is a pure client-side SPA with no backend:
+
+- **Routing** — React Router DOM v7; routes defined in `tikkle/src/App.jsx`
+- **State** — Cart state managed via React Context + `useReducer` in `tikkle/src/context/CartContext.jsx`; exposes `addItem`, `removeItem`, `updateQty`, `clearCart`, `totalItems`, `totalPrice`
+- **Data** — Static product catalog in `tikkle/src/data/products.js`; cart items are keyed by `(id, selectedSize)` pairs
+- **Styling** — Tailwind CSS v4 (Vite plugin, no config file)
+
+Pages: `Home`, `Shop`, `ProductDetail` (`/product/:id`), `Cart`, `About`, `Contact`
+
+## Development Commands
+
+All commands run from inside `tikkle/`:
+
 ```powershell
-# Build an image from a Dockerfile in the current directory
-docker build -t <image-name> .
-
-# Run a container
-docker run -p <host-port>:<container-port> <image-name>
-
-# Run interactively with a shell
-docker run -it <image-name> /bin/sh
-
-# List running containers
-docker ps
-
-# List all containers (including stopped)
-docker ps -a
-
-# Stop a container
-docker stop <container-id>
-
-# Remove a container
-docker rm <container-id>
-
-# Remove an image
-docker rmi <image-name>
+cd tikkle
+npm install        # install dependencies
+npm run dev        # start Vite dev server (HMR)
+npm run build      # production build to dist/
+npm run preview    # preview the production build locally
+npm run lint       # run ESLint
 ```
 
-### Docker Compose
+## Docker Workflow (tikkle app)
+
 ```powershell
-# Start all services defined in docker-compose.yml
-docker compose up
+# Build the image from the tikkle directory
+docker build -t tikkle-app ./tikkle
 
-# Start in detached mode (background)
-docker compose up -d
+# Run locally on port 8080
+docker run -p 8080:80 tikkle-app
 
-# Stop all services
-docker compose down
-
-# Stop and remove volumes
-docker compose down -v
-
-# View logs
-docker compose logs -f
-
-# Rebuild images before starting
-docker compose up --build
-```
-
-### Useful Debugging
-```powershell
-# Open a shell inside a running container
+# Open shell in running container
 docker exec -it <container-id> /bin/sh
+```
 
-# View container logs
+The Dockerfile uses a two-stage build: Node 20 Alpine compiles the Vite app, then nginx:alpine serves the `dist/` output. `tikkle/nginx.conf` configures SPA fallback (`try_files $uri $uri/ /index.html`) so client-side routes work correctly.
+
+## CI/CD — Azure Pipelines
+
+`azure-pipelines.yml` triggers on pushes to `main` and:
+1. Logs in to Docker Hub using the `mydocker` service connection
+2. Builds the image tagged with `$(Build.BuildId)` and `latest`
+3. Pushes both tags to `meghanshu0/tikkle-app`
+
+The Docker context for the pipeline build is `$(Build.SourcesDirectory)/tikkle` with the Dockerfile at `tikkle/Dockerfile`.
+
+## General Docker Reference
+
+```powershell
+docker ps                          # running containers
+docker ps -a                       # all containers
+docker stop <container-id>
+docker rm <container-id>
+docker rmi <image-name>
 docker logs <container-id>
-
-# Inspect container details (networking, mounts, env vars)
-docker inspect <container-id>
-
-# Show resource usage
-docker stats
+docker inspect <container-id>      # networking, mounts, env vars
+docker stats                       # resource usage
 ```
 
 ## Environment
 
 - Platform: Windows 11, PowerShell
-- Use PowerShell syntax for all shell commands in this project
-- Docker Desktop for Windows should be running before using any docker commands
+- Docker Desktop for Windows must be running before any `docker` commands
