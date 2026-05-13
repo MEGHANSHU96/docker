@@ -8,7 +8,7 @@ export default function Navbar() {
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/sho", label: "Shopi" },
+    { to: "/shopi", label: "Shopi" },
     { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" },
   ];
