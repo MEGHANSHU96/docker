@@ -8,7 +8,7 @@ export default function Navbar() {
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/sho", label: "Shp" },
+    { to: "/sho", label: "Shopi" },
     { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" },
   ];
@@ -17,7 +17,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         <Link to="/" className="text-2xl tracking-widest font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
-          TIKLE
+          TIKLi
         </Link>
 
         <div className="hidden md:flex gap-8 text-sm font-medium tracking-wide">
