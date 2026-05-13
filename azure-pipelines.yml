@@ -5,17 +5,22 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  dockerRegistryConnection: 'MYDOCKER'
+  dockerRegistryConnection: 'mydocker'
   imageRepository: 'meghanshu0/tikkle-app'
-  tag: 'latest'
+  tag: '$(Build.BuildId)'
 
 steps:
 - task: Docker@2
-  displayName: Build and Push Docker Image
+  displayName: Login to Docker Hub
   inputs:
-    command: buildAndPush
+    command: login
     containerRegistry: $(dockerRegistryConnection)
-    repository: $(imageRepository)
-    dockerfile: '$(Build.SourcesDirectory)/tikkle/Dockerfile'
-    tags: |
-      $(tag)
+
+- script: |
+    docker build -t $(imageRepository):$(tag) -t $(imageRepository):latest -f $(Build.SourcesDirectory)/tikkle/Dockerfile $(Build.SourcesDirectory)/tikkle
+  displayName: Build image
+
+- script: |
+    docker push $(imageRepository):$(tag)
+    docker push $(imageRepository):latest
+  displayName: Push image
